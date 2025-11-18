@@ -1,0 +1,198 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Purchase Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .container {
+            margin-top: 60px;
+            max-width: 700px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+            background: white;
+        }
+        h3 {
+            color: #0d6efd;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 500;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #0d6efd;
+            padding: 8px 18px;
+            border-radius: 6px;
+        }
+        .back-link:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+        #materialPrice {
+            font-weight: 500;
+            color: green;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h3>Create Purchase Order</h3>
+
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" id="poForm">
+                {% csrf_token %}
+
+                <!-- Supplier Dropdown -->
+                <div class="mb-3">
+                    <label for="supplierSelect">Supplier</label>
+                    <select id="supplierSelect" name="supplier" class="form-select" required>
+                        <option value="">Select Supplier</option>
+                        {% for s in suppliers %}
+                            <option value="{{ s.id }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Raw Material Dropdown -->
+                <div class="mb-3">
+                    <label for="rawMaterialSelect">Raw Material</label>
+                    <select id="rawMaterialSelect" name="raw_material" class="form-select" required>
+                        <option value="">Select Raw Material</option>
+                    </select>
+                    <div id="materialPrice"></div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="mb-3">
+                    <label for="quantityInput">Quantity</label>
+                    <input type="number" id="quantityInput" name="quantity" class="form-control" min="1" required>
+                    <div id="totalCost" class="text-primary mt-2"></div>
+                </div>
+
+                <!-- Delivery Date -->
+                <div class="mb-3">
+                    <label for="deliveryDate">Delivery Date</label>
+                    <input type="date" id="deliveryDate" name="delivery_date" class="form-control" required>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary w-100">Create Purchase Order</button>
+            </form>
+
+            <!-- Back Button -->
+            <div class="text-center">
+                <a href="{% url 'dashboard' %}" class="back-link mt-3">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+    /*golbal $*/
+    
+    $(document).ready(function () {
+        const supplierSelect = $("#supplierSelect");
+        const materialSelect = $("#rawMaterialSelect");
+        const priceDisplay = $("#materialPrice");
+        const quantityInput = $("#quantityInput");
+        const totalCostDisplay = $("#totalCost");
+        let currentPrice = 0;
+
+        // Load materials when a supplier is selected
+        supplierSelect.change(function () {
+            const supplierId = $(this).val();
+            materialSelect.empty().append('<option value="">Loading...</option>');
+            priceDisplay.text("");
+            totalCostDisplay.text("");
+
+            if (!supplierId) {
+                materialSelect.empty().append('<option value="">Select Raw Material</option>');
+                return;
+            }
+
+            $.ajax({
+                url: `/suppliers/${supplierId}/raw-materials/`,
+                type: "GET",
+                success: function (response) {
+                    materialSelect.empty().append('<option value="">Select Raw Material</option>');
+
+                    if (response.raw_materials && response.raw_materials.length > 0) {
+                        response.raw_materials.forEach(material => {
+                            // Avoid showing "(undefined)"
+                            const originText = material.origin ? ` (${material.origin})` : "";
+                            materialSelect.append(
+                                `<option value="${material.id}" data-price="${material.cost_per_pound}">
+                                    ${material.name}(${material.origin})
+                                </option>`
+                            );
+                        });
+                    } else {
+                        materialSelect.append('<option value="">No materials found</option>');
+                    }
+                },
+                error: function () {
+                    materialSelect.empty().append('<option value="">Error loading materials</option>');
+                }
+            });
+        });
+
+        // Display material price on selection
+        materialSelect.change(function () {
+            const selected = $(this).find("option:selected");
+            const price = parseFloat(selected.data("price"));
+
+            if (price && !isNaN(price)) {
+                currentPrice = price;
+                priceDisplay.html(`Price: <span class="text-success">$${price.toFixed(2)} per pound</span>`);
+            } else {
+                currentPrice = 0;
+                priceDisplay.text("");
+            }
+
+            totalCostDisplay.text("");
+            quantityInput.val("");
+        });
+
+        // Calculate total cost
+        quantityInput.on("input", function () {
+            const quantity = parseFloat($(this).val());
+            if (!isNaN(quantity) && quantity > 0 && currentPrice > 0) {
+                const total = quantity * currentPrice;
+                totalCostDisplay.html(`Total Cost: <strong class="text-success">$${total.toFixed(2)}</strong>`);
+            } else {
+                totalCostDisplay.text("");
+            }
+        });
+    });
+    </script>
+</body>
+</html>

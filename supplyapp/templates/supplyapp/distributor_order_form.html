@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Distributor Order Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: "Segoe UI", sans-serif; }
+        .container { max-width: 650px; margin-top: 60px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px; background: #fff; }
+        h3 { text-align: center; color: #0d6efd; margin-bottom: 25px; }
+        .btn-primary { background-color: #0d6efd; border: none; }
+        .btn-primary:hover { background-color: #0b5ed7; }
+        .price-display { font-size: 15px; font-weight: 500; color: green; margin-top: 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h3>Place Distributor Order</h3>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" id="orderForm">
+            {% csrf_token %}
+            <!-- Distributor selection -->
+            <div class="mb-3">
+                <label for="distributor" class="form-label">Select Distributor</label>
+                <select name="distributor" id="distributor" class="form-select" required>
+                    <option value="">Select Distributor</option>
+                    {% for d in distributors %}
+                        <option value="{{ d.id }}">{{ d.name }} ({{ d.region }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Finished product selection -->
+            <div class="mb-3">
+                <label for="finished_product" class="form-label">Finished Product</label>
+                <select name="finished_product" id="finished_product" class="form-select" required>
+                    <option value="">Select Finished Product</option>
+                    {% for p in finished_products %}
+                        <option value="{{ p.id }}" data-price="{{ p.unit_price }}">
+                            {{ p.blend_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="price-display" id="priceInfo">Unit Price: $0.00</div>
+            </div>
+
+            <!-- Quantity input -->
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" name="quantity" id="quantity" class="form-control" min="1" required>
+            </div>
+
+            <!-- Total price display -->
+            <div class="mb-3">
+                <label class="form-label">Total Price</label>
+                <input type="text" id="total_price" class="form-control" readonly value="$0.00">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Place Order</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const productSelect = document.getElementById('finished_product');
+    const quantityInput = document.getElementById('quantity');
+    const priceInfo = document.getElementById('priceInfo');
+    const totalPrice = document.getElementById('total_price');
+
+    function updatePrice() {
+        const selected = productSelect.options[productSelect.selectedIndex];
+        const unitPrice = parseFloat(selected.getAttribute('data-price') || 0);
+        const qty = parseInt(quantityInput.value || 0);
+        const total = unitPrice * qty;
+
+        priceInfo.textContent = `Unit Price: $${unitPrice.toFixed(2)}`;
+        totalPrice.value = `$${total.toFixed(2)}`;
+    }
+
+    productSelect.addEventListener('change', updatePrice);
+    quantityInput.addEventListener('input', updatePrice);
+</script>
+</body>
+</html>

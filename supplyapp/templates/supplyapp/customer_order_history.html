@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Customer Orders</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      margin-top: 60px;
+      margin-bottom: 40px;
+    }
+    h2 {
+      color: #0d6efd;
+      font-weight: 600;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    table {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0px 3px 8px rgba(0,0,0,0.1);
+    }
+    th {
+      background-color: #0d6efd;
+      color: white;
+      text-align: center;
+    }
+    td {
+      text-align: center;
+      vertical-align: middle;
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+    .status-badge {
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: white;
+      font-weight: 500;
+    }
+    .status-processing { background-color: #ffc107; }
+    .status-shipped { background-color: #0dcaf0; }
+    .status-delivered { background-color: #198754; }
+    .status-default { background-color: #6c757d; }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: white;
+      background-color: #0d6efd;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: all 0.2s ease-in-out;
+    }
+    .back-link:hover {
+      background-color: #0b5ed7;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Customer Order List</h2>
+
+    <table class="table table-bordered table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Distributor</th>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Tracking No.</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>{{ order.order_id }}</td>
+          <td>{{ order.customer_name }}</td>
+          <td>{{ order.distributor_name }}</td>
+          <td>{{ order.product_name }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>{{ order.address }}</td>
+          <td>
+            {% if order.status == "Processing" %}
+              <span class="status-badge status-processing">{{ order.status }}</span>
+            {% elif order.status == "Shipped" %}
+              <span class="status-badge status-shipped">{{ order.status }}</span>
+            {% elif order.status == "Delivered" %}
+              <span class="status-badge status-delivered">{{ order.status }}</span>
+            {% else %}
+              <span class="status-badge status-default">{{ order.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if order.tracking_link %}
+              {{ order.tracking_link }}
+            {% else %}
+              <em>Not assigned</em>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'shipment_tracking' order.order_id %}" class="btn btn-sm btn-primary">Track</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="text-center">
+      <a href="{% url 'dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </div>
+  </div>
+
+</body>
+</html>

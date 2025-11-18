@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Raw Materials</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .container { margin-top: 60px; }
+    h2 { color: #0d6efd; text-align: center; margin-bottom: 25px; }
+    .btn-update { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 5px 12px; }
+    .btn-update:hover { background: #0b5ed7; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Raw Materials List</h2>
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Name</th><th>Supplier</th><th>Origin</th><th>Cost</th><th>Quantity</th><th>Warehouse</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in raw_materials %}
+        <tr>
+          <td>{{ m.name }}</td><td>{{ m.supplier.name }}</td><td>{{ m.origin }}</td><td>{{ m.cost_per_pound }}</td><td>{{ m.quantity }}</td><td>{{ m.warehouse_location }}</td>
+          <td><a href="{% url 'update_raw_material_stock' m.id %}" class="btn btn-update btn-sm">Update</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="text-center"><a href="{% url 'dashboard' %}" class="btn btn-primary">← Back to Dashboard</a></div>
+  </div>
+</body>
+</html>

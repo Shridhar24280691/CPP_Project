@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if action == 'edit' %}Edit Supplier{% elif action == 'add' %}Add Supplier{% elif action == 'delete' %}Delete Supplier{% endif %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+
+  {% if action == 'add' or action == 'edit' %}
+    <h2>{% if action == 'edit' %}Edit Supplier{% else %}Add New Supplier{% endif %}</h2>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="{{ action }}">
+      {% if supplier %}
+        <input type="hidden" name="supplier_id" value="{{ supplier.id }}">
+      {% endif %}
+
+      <!-- Form Fields -->
+      <div class="mb-3">
+        <label for="name" class="form-label">Supplier Name</label>
+        <input type="text" class="form-control" id="name" name="name"
+             value="{{ supplier.name|default_if_none:'' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="product" class="form-label">Product</label>
+        <input type="text" class="form-control" id="product" name="product"
+             value="{{ supplier.product|default_if_none:'' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="price_per_unit" class="form-label">Price per Unit</label>
+          <input type="number" step="0.01" class="form-control" id="price_per_unit" name="price_per_unit"
+            value="{{ supplier.price_per_unit|default_if_none:'' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="origin" class="form-label">Origin</label>
+          <input type="text" class="form-control" id="origin" name="origin"
+             value="{{ supplier.origin|default_if_none:'' }}" required>
+      </div>
+
+    <button type="submit" class="btn btn-primary">
+      {% if action == 'edit' %}Update{% else %}Add{% endif %}
+    </button>
+    <a href="{% url 'supplier_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+  {% elif action == 'delete' %}
+    <h3>Are you sure you want to delete "{{ supplier.name }}"?</h3>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="delete">
+      <input type="hidden" name="supplier_id" value="{{ supplier.id }}">
+      <button type="submit" class="btn btn-danger">Confirm Delete</button>
+      <a href="{% url 'supplier_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  {% endif %}
+
+</div>
+</body>
+</html>

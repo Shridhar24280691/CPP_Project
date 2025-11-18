@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Finished Products</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .container { margin-top: 60px; }
+    h2 { color: #0d6efd; text-align: center; margin-bottom: 25px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Finished Products</h2>
+    <table class="table table-hover">
+      <thead>
+        <tr><th>Blend</th><th>Raw Material</th><th>Quantity</th><th>Unit Price</th><th>Total Value</th></tr>
+      </thead>
+      <tbody>
+        {% for p in finished_products %}
+        <tr>
+          <td>{{ p.blend_name }}</td><td>{{ p.raw_material.name }}</td><td>{{ p.quantity }}</td><td>{{ p.unit_price }}</td><td>{{ p.total_value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="text-center"><a href="{% url 'dashboard' %}" class="btn btn-primary">← Back to Dashboard</a></div>
+  </div>
+</body>
+</html>
